@@ -243,3 +243,97 @@ window.adk_pdisp = {'h' : 'xml.qualiclicks.com',
   't' : 24};
 </script>
 <script src='//static.qualiclicks.com/tabu/display.js'></script></head>
+<head><!-- BEGIN EZMOB TAG -->
+<script type="text/javascript" src="https://ezmob-site.sfo3.digitaloceanspaces.com/prebid.js" async></script>
+    <script>
+	var pbjs = pbjs || {};
+	pbjs.que = pbjs.que || [];
+
+	pbjs.que.push(function() {
+        var adUnits = [
+		{
+            code: 'container1',
+			mediaTypes: {
+            banner: {
+                sizes: [120, 600]
+				}
+        },
+			bids: [{
+            bidder: 'adkernel',
+				params: {
+                zoneId: 342752,
+				  host: 'cpm.ezmob.com'
+				}
+			}]
+		}];
+		pbjs.addAdUnits(adUnits);
+		pbjs.requestBids({
+			bidsBackHandler: handleBids
+		});
+	});
+
+	function handleBids() {
+        var winners = pbjs.getHighestCpmBids();
+        for (winner of winners) {
+            var ifrmEl = document.createElement('iframe');
+            ifrmEl.scrolling = 'no'
+			document.getElementById(winner.adUnitCode).appendChild(ifrmEl);
+			pbjs.renderAd(ifrmEl.contentDocument || ifrmEl.contentWindow.document, winner.adId);
+		}
+    }
+    </script>
+    <div id="container1"></div>
+<!-- END TAG --></head>
+<head><script type="text/javascript" src="https://docdn.ezmob.com/prebid.js" async></script>
+<script>
+	var pbjs = pbjs || {};
+	pbjs.que = pbjs.que || [];
+	
+	pbjs.que.push(function() {
+		var adUnits = [{
+			code: 'container-1',
+			mediaTypes: {
+				video: {
+					context: 'outstream',
+					playerSize: [300, 250],
+					renderer: {
+						url: 'https://docdn.ezmob.com/outstream_pb.js',
+						render: renderOutstream
+					}
+				}
+			},
+			bids: [{
+				bidder: 'adkernel',
+				params: {
+				  zoneId: 342753,
+				  host: 'cpm.ezmob.com'
+				}
+
+			}]
+		}];
+		pbjs.addAdUnits(adUnits);
+		pbjs.requestBids({
+			bidsBackHandler: function(bidResponses) {
+				process('container-1');
+			}
+		});
+	});
+
+	function process(adUnit) {
+		var bidResponses = pbjs.getHighestCpmBids(adUnit);
+		if (bidResponses.length == 0) {
+			return;
+		}
+		var bid = bidResponses[0];
+		pbjs.renderAd(document, bid.adId);
+	}
+	
+	function renderOutstream(bid) {
+		OutstreamPlayerPB(bid, {
+			displayMode: 'floating',
+			transitions: true,
+			vpaidMode: 2
+		});
+	}
+</script>
+<div id="container-1"></div></head>
