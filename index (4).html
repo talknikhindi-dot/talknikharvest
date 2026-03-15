@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talknik Flower Harvest - Premium Edition</title>
+    <style>
+        :root {
+            --primary-gold: #ffd700;
+            --premium-bg: radial-gradient(circle, #1e3c72 0%, #112240 100%);
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--premium-bg);
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* High Quality Title */
+        #game-title {
+            font-size: 50px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-top: 20px;
+            background: linear-gradient(to right, #fff, var(--primary-gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 75vh;
+            margin-top: 20px;
+            background: var(--glass);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            cursor: none;
+            display: none;
+        }
+
+        /* The Premium Basket */
+        #basket {
+            position: absolute;
+            bottom: 20px;
+            width: 100px;
+            height: 60px;
+            background: linear-gradient(145deg, #ffd700, #b8860b);
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 -5px 10px rgba(0,0,0,0.2);
+            border-top: 5px solid #fff;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: transform 0.1s ease-out;
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 40px;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.8));
+            user-select: none;
+        }
+
+        /* UI Elements */
+        #ui-layer {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+        }
+
+        .btn-premium {
+            padding: 18px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #112240;
+            background: var(--primary-gold);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-premium:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+        }
+
+        #score-board {
+            font-size: 30px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--primary-gold);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-title">TALKNIK HARVEST</div>
+
+    <div id="ui-layer">
+        <button class="btn-premium" onclick="startGame()">Start Mission</button>
+    </div>
+
+    <div id="game-container">
+        <div id="basket"></div>
+    </div>
+
+    <div id="score-board">FLOWERS: <span id="score">0</span></div>
+
+    <script>
+        const collectSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3');
+        const gameOverSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2021/2021-preview.mp3');
+        
+        let score = 0;
+        let gameActive = false;
+        const basket = document.getElementById('basket');
+        const container = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+
+        // Basket Movement
+        container.addEventListener('mousemove', (e) => {
+            if (!gameActive) return;
+            let rect = container.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            if (x > 50 && x < rect.width - 50) {
+                basket.style.left = x + 'px';
+            }
+        });
+
+        function startGame() {
+            score = 0;
+            gameActive = true;
+            scoreDisplay.innerText = score;
+            document.getElementById('ui-layer').style.display = 'none';
+            container.style.display = 'block';
+            document.getElementById('score-board').style.display = 'block';
+            
+            spawnFlower();
+        }
+
+        function spawnFlower() {
+            if (!gameActive) return;
+
+            const flower = document.createElement('div');
+            const types = ['🌸', '🌹', '🌻', '🌺', '🌷', '🌼'];
+            flower.classList.add('flower');
+            flower.innerText = types[Math.floor(Math.random() * types.length)];
+            
+            let startX = Math.random() * (container.clientWidth - 50);
+            flower.style.left = startX + 'px';
+            flower.style.top = '-50px';
+            container.appendChild(flower);
+
+            let speed = Math.random() * 2 + 3; // Premium smooth speed
+            let fallInterval = setInterval(() => {
+                let top = parseInt(flower.style.top);
+                flower.style.top = (top + 5) + 'px';
+
+                // Check Catch (Collision)
+                let bRect = basket.getBoundingClientRect();
+                let fRect = flower.getBoundingClientRect();
+
+                if (fRect.bottom >= bRect.top && 
+                    fRect.right >= bRect.left && 
+                    fRect.left <= bRect.right && 
+                    fRect.top <= bRect.bottom) {
+                    
+                    score++;
+                    scoreDisplay.innerText = score;
+                    collectSound.currentTime = 0;
+                    collectSound.play(); // Collection Sound
+                    clearInterval(fallInterval);
+                    flower.remove();
+                    spawnFlower();
+                }
+
+                // Missed Flower
+                if (top > container.clientHeight) {
+                    clearInterval(fallInterval);
+                    flower.remove();
+                    endGame();
+                }
+            }, 20);
+        }
+
+        function endGame() {
+            gameActive = false;
+            gameOverSound.play(); // Game Over Sound
+            alert("HARVEST COMPLETE!\nYour Score: " + score);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
